@@ -1,10 +1,14 @@
 .env
 .venv/
+data/
+*.db
 data/*.db
 node_modules/
 frontend/dist/
 __pycache__/
 *.pyc
 *.log
+.sync.log
+logs/
 data/*.db.bak
 *.db.bak
