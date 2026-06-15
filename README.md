@@ -1,12 +1,16 @@
+## Demo
+
+The live demo uses seeded coverage data rather than my real Strava history. The trail geometries, names, and lengths are genuine NPS data. The completion percentages are fabricated for demonstration purposes.
+
+https://rock-creek-tracker.onrender.com/ 
+
 # Rock Creek Park Trail Tracker
 
 A personal full-stack web app that maps my progress toward completing every named trail in Washington DC's Rock Creek Park before I leave the city.
 
 Built because I'm a consultant finishing up two years in DC with a specific goal: walk and run every trail in the park before my August 2026 departure. I'd been logging every outdoor activity on Strava and wanted a way to visualize exactly which trail segments I'd covered, which I hadn't, and whether I was on pace to finish in time.
 
-No existing tool does this. Most trail apps track individual hikes. This one tracks cumulative geographic coverage across hundreds of activities over two years — and tells me what to do next.
-
-[Insert screenshot here]
+No existing tool does this. Most trail apps track individual hikes. This one tracks cumulative geographic coverage across hundreds of activities over 7 years. Most imporatnly, I designed it to tell me what to do next to hit my goal.
 
 ---
 
@@ -87,28 +91,3 @@ python scripts/compute_progress.py
 ```
 
 The sync is idempotent — it skips activities already in the database.
-
----
-
-## Demo
-
-The live demo uses seeded coverage data rather than my real Strava history. The trail geometries, names, and lengths are genuine NPS data. The completion percentages are fabricated for demonstration purposes.
-
-https://rock-creek-tracker.onrender.com/ 
-
----
-
-## Deploying the demo
-
-No database files are committed to the repo. The demo database is generated at
-build time from genuine NPS/OSM trail geometry, with fabricated coverage and a
-handful of synthetic activities — never any real Strava data.
-
-- **Build command:** `bash scripts/build.sh`
-  (installs deps, fetches trail geometry, builds `data/demo.db`, builds the frontend)
-- **Start command:** `RCT_DB=demo.db uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
-
-The `RCT_DB` environment variable selects which SQLite file under `data/` the app
-serves; it defaults to `trails.db` (real data) and is set to `demo.db` for the
-public demo. Re-run `python scripts/seed_demo_data.py --reset` any time to
-regenerate the seeded data.
