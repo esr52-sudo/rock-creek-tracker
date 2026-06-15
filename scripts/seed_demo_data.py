@@ -151,16 +151,42 @@ def longest_component(utm_geom):
 # --------------------------------------------------------------------------- #
 # seeding steps
 # --------------------------------------------------------------------------- #
-def build_demo_db(session):
-    """(Re)build the demo DB's trails from the real database: copy trail
-    geometry/names/lengths and the cached park boundary, with coverage zeroed
-    and NO activities. Idempotent — wipes any prior demo content first."""
+def _reset_coverage(session):
+    """Drop all activities and zero every trail's coverage columns in this DB."""
     session.query(TrailActivity).delete()
     session.query(Activity).delete()
-    session.query(Trail).delete()
+    for t in session.query(Trail):
+        t.covered_foot_geojson = None
+        t.covered_bike_geojson = None
+        t.uncovered_geojson = None
+        t.pct_complete_foot = 0.0
+        t.pct_complete_bike = 0.0
+        t.pct_complete_total = 0.0
+        t.is_complete = False
+
+
+def build_demo_db(session):
+    """Prepare this database's trails for seeding — zeroed coverage, no
+    activities. Works in two modes so it's robust both locally and on deploy:
+
+    * In-place: if this DB already holds trail geometry (e.g. fetch_trails.py
+      wrote it straight into demo.db during a Render build), seed onto those
+      trails directly. No other database is read.
+    * Copy: otherwise source trail geometry + the cached park boundary from the
+      real trails.db, leaving its real activity data untouched (local workflow).
+    """
+    if session.query(Trail).count() > 0:
+        _reset_coverage(session)
+        session.flush()
+        return
 
     with RealSession() as real:
         real_trails = real.query(Trail).all()
+        if not real_trails:
+            sys.exit(
+                f"no trails found in this DB or {REAL_DB_PATH} — "
+                "run scripts/fetch_trails.py first"
+            )
         for t in real_trails:
             session.add(
                 Trail(
@@ -179,10 +205,6 @@ def build_demo_db(session):
         boundary = real.query(Meta).filter_by(key="park_boundary_geojson").first()
         boundary_value = boundary.value if boundary is not None else None
 
-    if not real_trails:
-        sys.exit(
-            f"no trails in {REAL_DB_PATH} — run scripts/fetch_trails.py first"
-        )
     if boundary_value is not None:
         set_meta(session, "park_boundary_geojson", boundary_value)
     session.flush()
