@@ -94,7 +94,7 @@ The sync is idempotent — it skips activities already in the database.
 
 The live demo uses seeded coverage data rather than my real Strava history. The trail geometries, names, and lengths are genuine NPS data. The completion percentages are fabricated for demonstration purposes.
 
-[Live demo link — coming soon]
+https://rock-creek-tracker.onrender.com/ 
 
 ---
 
