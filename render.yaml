@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: rock-creek-tracker
+    runtime: python
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      cd frontend && npm install && npm run build && cd ..
+      python scripts/fetch_trails.py
+      python scripts/seed_demo_data.py
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: RCT_DB
+        value: demo.db
+      - key: PYTHON_VERSION
+        value: "3.12.13"

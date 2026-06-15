@@ -15,10 +15,14 @@ from sqlalchemy import (
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA_DIR = ROOT / "data"
-DATA_DIR.mkdir(exist_ok=True)
-# Which SQLite file to use, relative to data/. Defaults to the real database;
-# set RCT_DB=demo.db to run against the seeded portfolio/demo database.
+# Data directory holding the SQLite file(s). Defaults to <project>/data locally;
+# set RCT_DATA_DIR to an absolute path (e.g. /data on a mounted disk) to override.
+# Relative values are resolved against the project root.
+_data_dir = os.environ.get("RCT_DATA_DIR", "data")
+DATA_DIR = Path(_data_dir) if os.path.isabs(_data_dir) else ROOT / _data_dir
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+# Which SQLite file under DATA_DIR to use. Defaults to the real database; set
+# RCT_DB=demo.db to run against the seeded portfolio/demo database.
 DB_PATH = DATA_DIR / os.environ.get("RCT_DB", "trails.db")
 
 engine = create_engine(f"sqlite:///{DB_PATH}", future=True)
