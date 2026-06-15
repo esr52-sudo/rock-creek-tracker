@@ -95,3 +95,20 @@ The sync is idempotent — it skips activities already in the database.
 The live demo uses seeded coverage data rather than my real Strava history. The trail geometries, names, and lengths are genuine NPS data. The completion percentages are fabricated for demonstration purposes.
 
 [Live demo link — coming soon]
+
+---
+
+## Deploying the demo
+
+No database files are committed to the repo. The demo database is generated at
+build time from genuine NPS/OSM trail geometry, with fabricated coverage and a
+handful of synthetic activities — never any real Strava data.
+
+- **Build command:** `bash scripts/build.sh`
+  (installs deps, fetches trail geometry, builds `data/demo.db`, builds the frontend)
+- **Start command:** `RCT_DB=demo.db uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+
+The `RCT_DB` environment variable selects which SQLite file under `data/` the app
+serves; it defaults to `trails.db` (real data) and is set to `demo.db` for the
+public demo. Re-run `python scripts/seed_demo_data.py --reset` any time to
+regenerate the seeded data.

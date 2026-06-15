@@ -1,4 +1,5 @@
 """SQLite schema and session factory for the trail tracker."""
+import os
 from pathlib import Path
 
 from sqlalchemy import (
@@ -16,7 +17,9 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
-DB_PATH = DATA_DIR / "trails.db"
+# Which SQLite file to use, relative to data/. Defaults to the real database;
+# set RCT_DB=demo.db to run against the seeded portfolio/demo database.
+DB_PATH = DATA_DIR / os.environ.get("RCT_DB", "trails.db")
 
 engine = create_engine(f"sqlite:///{DB_PATH}", future=True)
 SessionLocal = sessionmaker(bind=engine, future=True)
