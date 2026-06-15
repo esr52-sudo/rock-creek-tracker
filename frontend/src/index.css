@@ -1,0 +1,766 @@
+:root {
+  --color-complete: #4a7c59;
+  --color-partial: #c4793a;
+  --color-incomplete: #6b5c45;
+  --color-bg: #1c1a17;
+  --color-surface: #2a2520;
+  --color-border: #3d3530;
+  --color-text-primary: #e8e0d4;
+  --color-text-secondary: #a89880;
+  --color-accent: #8fb87a;
+  --color-covered-foot: #4a7c59; /* forest green */
+  --color-covered-bike: #4a7d9e; /* slate blue */
+  --color-uncovered: #6b5c45; /* weathered wood */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root,
+.app {
+  height: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.map-root {
+  width: 100vw;
+  height: 100vh;
+  background: var(--color-bg);
+}
+
+/* hover glow on trail polylines (color is set to the stroke color in JS) */
+.trail-glow {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* ---------- stats panel ---------- */
+
+.stats-panel {
+  position: fixed;
+  top: var(--space-5);
+  right: var(--space-5);
+  width: 280px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  z-index: 1000;
+  background: var(--color-surface);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: var(--space-5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.panel-tabs {
+  display: flex;
+  width: 100%;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  margin-bottom: var(--space-4);
+}
+
+.panel-tab {
+  flex: 1;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.panel-tab.active {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.stats-kicker,
+.section-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.section-label {
+  margin-bottom: var(--space-3);
+}
+
+.stats-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  font-size: 24px;
+  margin: var(--space-1) 0 var(--space-4);
+}
+
+.stats-pct {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  font-size: 64px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--color-accent);
+}
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-border);
+  margin: var(--space-4) 0 var(--space-5);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #4a7c59, #8fb87a);
+  transition: width 1s ease-out;
+}
+
+/* ---------- departure deadline ---------- */
+
+.deadline-section {
+  margin: var(--space-1) 0 var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.deadline-days {
+  font-family: 'Playfair Display', serif;
+  color: var(--color-text-primary);
+  font-size: 15px;
+  margin-bottom: var(--space-3);
+}
+
+.deadline-num {
+  font-size: 34px;
+  font-weight: 600;
+  margin-right: var(--space-1);
+  line-height: 1;
+}
+
+.deadline-line {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: var(--space-1) 0;
+}
+
+.deadline-over {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.pace-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.pace-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.pace-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.pace-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.stats-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ---------- lifetime miles odometer ---------- */
+
+.odometer-section {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.odometer-value {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.odometer-unit {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin-left: var(--space-2);
+  letter-spacing: 0;
+}
+
+.odometer-breakdown {
+  margin-top: var(--space-2);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.stats-row span:last-child {
+  color: var(--color-text-primary);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot-foot {
+  background: var(--color-covered-foot);
+}
+
+.dot-bike {
+  background: var(--color-covered-bike);
+}
+
+.dot-uncovered {
+  background: var(--color-uncovered);
+}
+
+/* ---------- quick wins ---------- */
+
+.qw-summary {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.qw-empty {
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  padding: 28px 0;
+}
+
+.qw-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.qw-row {
+  min-height: 56px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.qw-row:last-child {
+  border-bottom: none;
+}
+
+.qw-row:hover .qw-name {
+  color: var(--color-accent);
+}
+
+.qw-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.qw-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.qw-left {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.qw-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.qw-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.qw-pct {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  text-align: right;
+  margin-top: 3px;
+}
+
+/* smooths the quick-wins click pulse (weight 3 -> 8 -> 3) */
+.trail-pulse {
+  transition: stroke-width 0.3s ease;
+}
+
+/* ---------- route planner ---------- */
+
+.plan-btn {
+  width: 100%;
+  margin-top: var(--space-4);
+  padding: 8px;
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  border-radius: 8px;
+  color: var(--color-accent);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.plan-btn:hover {
+  background: rgba(143, 184, 122, 0.1);
+}
+
+.route-panel {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(8px);
+  overflow: hidden;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease,
+    max-height 0.3s ease;
+}
+
+.route-panel.open {
+  max-height: 440px;
+  opacity: 1;
+  transform: translateY(0);
+  margin-top: var(--space-3);
+}
+
+.route-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.route-label,
+.route-start {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.route-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  outline: none;
+  margin: 10px 0 14px;
+}
+
+.route-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: none;
+  cursor: pointer;
+}
+
+.route-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: none;
+  cursor: pointer;
+}
+
+.route-start {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.route-link {
+  color: var(--color-accent);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.route-clear {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.route-input {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-primary);
+  padding: 6px 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+}
+
+.route-build {
+  width: 100%;
+  padding: 9px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.route-build:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.route-loading {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.route-error {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #b45252;
+}
+
+.route-summary {
+  font-size: 13px;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.route-trails {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  max-height: 130px;
+  overflow-y: auto;
+}
+
+.route-trails li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  padding: 2px 0;
+}
+
+/* ---------- trail popup ---------- */
+
+.custom-popup .leaflet-popup-content-wrapper {
+  width: 300px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+  color: var(--color-text-primary);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.custom-popup .leaflet-popup-tip {
+  display: none;
+}
+
+.custom-popup .leaflet-popup-content {
+  margin: 0;
+  width: 100% !important;
+}
+
+.custom-popup a.leaflet-popup-close-button {
+  color: var(--color-text-secondary);
+  top: 8px;
+  right: 8px;
+}
+
+.popup-accent {
+  height: 4px;
+  width: 100%;
+  border-radius: 12px 12px 0 0;
+}
+
+.popup-header {
+  padding: 16px 16px 12px;
+}
+
+.popup-name {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+}
+
+.popup-subtitle {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.popup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+
+.popup-cell {
+  background: var(--color-bg);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.popup-cell-label {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.popup-cell-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.popup-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-border);
+  margin: 0 16px 12px;
+  overflow: hidden;
+}
+
+.popup-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0;
+  transition: width 0.6s ease-out;
+}
+
+.popup-section-label {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.popup-activities {
+  padding: 0 16px 14px;
+}
+
+.popup-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.pill:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.popup-desc-wrap {
+  margin: 0 16px;
+  padding: 12px 0 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.popup-desc {
+  font-size: 13px;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- misc ---------- */
+
+.error-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: var(--color-surface);
+  border: 1px solid var(--color-partial);
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.leaflet-container {
+  font-family: 'DM Sans', sans-serif;
+}
+
+.leaflet-control-attribution {
+  background: rgba(28, 26, 23, 0.75) !important;
+  color: var(--color-text-secondary) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 10px !important;
+  border-radius: 4px 0 0 0;
+  padding: 3px 8px;
+  backdrop-filter: blur(4px);
+}
+
+.leaflet-control-attribution a {
+  color: var(--color-accent) !important;
+}
+
+.leaflet-control-scale-line {
+  background: rgba(28, 26, 23, 0.75) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-secondary) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 10px !important;
+  backdrop-filter: blur(4px);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* park boundary hull: purely decorative */
+.park-hull {
+  pointer-events: none;
+}
+
+/* suggested-route "marching ants" */
+@keyframes dash-march {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+.route-march {
+  animation: dash-march 1.2s linear infinite;
+}

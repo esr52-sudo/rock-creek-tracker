@@ -1,0 +1,10 @@
+.env
+.venv/
+data/*.db
+node_modules/
+frontend/dist/
+__pycache__/
+*.pyc
+*.log
+data/*.db.bak
+*.db.bak
